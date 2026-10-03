@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>東方妖々夢 〜 Youmu Ghost Slayer</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=M+PLUS+1p:wght@400;700;900&family=Shippori+Mincho:wght@600;800&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div id="app-container">
+    <div id="game-wrapper">
+      <canvas id="gameCanvas" width="960" height="540"></canvas>
+
+      <!-- Touhou HUD Overlay -->
+      <div id="hud-overlay" class="hud">
+        <div class="hud-top-left">
+          <div class="title-badge">東方風爽快アクション</div>
+          <h1 class="game-hud-title">魂魄妖夢の退治劇</h1>
+        </div>
+        
+        <div class="hud-top-right">
+          <div class="score-box">
+            <div class="score-line"><span class="label">HIGH SCORE</span><span id="highScoreVal" class="value">000,000,000</span></div>
+            <div class="score-line"><span class="label">SCORE</span><span id="scoreVal" class="value">000,000,000</span></div>
+          </div>
+          <div class="status-box">
+            <div class="status-row"><span class="label">PLAYER</span><div id="lifeContainer" class="icon-container"></div></div>
+            <div class="status-row"><span class="label">SPELL</span><div id="spellContainer" class="icon-container"></div></div>
+            <div class="status-row"><span class="label">POWER</span><span id="powerVal" class="value-highlight">1.00 / 4.00</span></div>
+          </div>
+        </div>
+
+        <!-- Boss Health Bar -->
+        <div id="bossHpContainer" class="boss-hp-container hidden">
+          <div class="boss-info">
+            <span id="bossName" class="boss-name">西行寺 幽々子</span>
+            <span id="bossSpellName" class="boss-spell">結界「生死の境」</span>
+          </div>
+          <div class="boss-hp-bar-bg">
+            <div id="bossHpBar" class="boss-hp-bar"></div>
+          </div>
+        </div>
+
+        <!-- Touch / On-screen Controls overlay for mobile/mouse click accessibility -->
+        <div class="mobile-controls">
+          <button id="btnLeft" class="ctrl-btn">◀</button>
+          <button id="btnRight" class="ctrl-btn">▶</button>
+          <button id="btnJump" class="ctrl-btn action-btn">JUMP (W)</button>
+          <button id="btnAttack" class="ctrl-btn attack-btn">斬撃 (Z)</button>
+          <button id="btnSpell" class="ctrl-btn spell-btn">スペル (X)</button>
+        </div>
+      </div>
+
+      <!-- Dialogue Overlay -->
+      <div id="dialogueBox" class="dialogue-box hidden">
+        <div class="portrait-container">
+          <div id="leftPortrait" class="portrait left"></div>
+          <div id="rightPortrait" class="portrait right"></div>
+        </div>
+        <div class="dialogue-text-container">
+          <div id="speakerName" class="speaker-name">魂魄妖夢</div>
+          <div id="dialogueContent" class="dialogue-text">「白玉楼の庭掃除の邪魔をするお化けたち、斬らせていただきます！」</div>
+          <div class="dialogue-hint">Press Z / Click to Next</div>
+        </div>
+      </div>
+
+      <!-- Spell Card Declaration Overlay -->
+      <div id="spellCutin" class="spell-cutin hidden">
+        <div class="cutin-bg"></div>
+        <div class="cutin-text-container">
+          <div id="cutinUser" class="cutin-user">魂魄 妖夢</div>
+          <div id="cutinName" class="cutin-name">人符「現世斬」</div>
+        </div>
+      </div>
+
+      <!-- Title Screen Overlay -->
+      <div id="titleScreen" class="overlay-screen active">
+        <div class="title-banner">
+          <p class="subtitle">Touhou Action Project</p>
+          <h1 class="main-title">魂魄妖夢の退治劇</h1>
+          <p class="title-jp">- Youmu Ghost Slayer -</p>
+        </div>
+        <div class="menu-container">
+          <button id="btnStart" class="menu-btn primary">GAME START (Z)</button>
+          <button id="btnHowTo" class="menu-btn">操作方法 (HOW TO PLAY)</button>
+        </div>
+        <div class="key-guide">
+          <span>[←][→] / [A][D]: 移動</span>
+          <span>[↑] / [W] / [Space]: ジャンプ</span>
+          <span>[Z] / [J]: 斬撃</span>
+          <span>[X] / [K]: スペルカード</span>
+        </div>
+      </div>
+
+      <!-- How to play Modal -->
+      <div id="howToModal" class="modal hidden">
+        <div class="modal-content">
+          <h2>操作方法 & ルール</h2>
+          <ul>
+            <li><strong>移動:</strong> キーボードの [←][→] または [A][D]</li>
+            <li><strong>ジャンプ:</strong> [↑] / [W] / [Space] (空中で2段ジャンプ可)</li>
+            <li><strong>斬撃 (刀を振る):</strong> [Z] / [J] （連射で連続コンボ！P珠を集めると斬撃波が出る）</li>
+            <li><strong>スペルカード (必殺技):</strong> [X] / [K] （画面全体の大技・無敵）</li>
+            <li><strong>おだんご 🍡:</strong> 体力回復</li>
+            <li><strong>P珠 🔮:</strong> 刀が強化！攻撃力UP＆遠距離斬撃波追加</li>
+          </ul>
+          <button id="btnCloseModal" class="menu-btn">閉じる</button>
+        </div>
+      </div>
+
+      <!-- Game Over / Stage Clear Overlay -->
+      <div id="resultScreen" class="overlay-screen hidden">
+        <h2 id="resultTitle" class="result-title">STAGE CLEAR</h2>
+        <div class="result-score-details">
+          <div class="result-row"><span>FINAL SCORE:</span><span id="finalScore">0</span></div>
+          <div class="result-row"><span>GHOSTS DEFEATED:</span><span id="finalKills">0</span></div>
+        </div>
+        <button id="btnRestart" class="menu-btn primary">RETRY (Z)</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>
